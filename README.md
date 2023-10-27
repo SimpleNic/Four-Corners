@@ -1,4 +1,4 @@
-# CSE-412
+# Four Corners
 
 ### To do
 * lobby creation screen/login screen
