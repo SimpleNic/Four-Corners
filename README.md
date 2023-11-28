@@ -1,8 +1,9 @@
 # Four Corners
 ### Run
-> npm install
-> node index.js
-
+```
+npm install
+node index.js
+```
 ### To do
 * lobby creation screen/login screen
 * user profile screen
