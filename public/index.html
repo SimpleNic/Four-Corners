@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Four Corners</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <canvas id="game-canvas" width="640" height="640"></canvas>
+    </div>
+
+    <div style="display:none;">
+      <img id="pieces" src="./chess_pieces/pieces.png"/>
+    </div>
+    
+    <script src="socket.io/socket.io.js"></script>
+    <script src="chess.js"></script>
+  </body>
+</html>

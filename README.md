@@ -1,4 +1,6 @@
 # Four Corners
+### How to run
+node index.js
 
 ### To do
 * lobby creation screen/login screen
