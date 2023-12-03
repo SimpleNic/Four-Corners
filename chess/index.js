@@ -3,6 +3,10 @@ import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { Server } from "socket.io";
+import pg from 'pg';
+import dotenv from 'dotenv'; 
+
+dotenv.config();
 
 const app = express();
 const server = createServer(app);
@@ -10,9 +14,52 @@ const io = new Server(server, {
   connectionStateRecovery: {},
 });
 
+const client = new pg.Client({
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+});
+
+process.env()
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const __publicPath = join(__dirname, "public");
 app.use(express.static(__publicPath));
+
+//
+// Postgresql
+//
+
+var startTime = Math.floor(Date.now() / 1000);
+const gameMoves = [];
+var game_id = -1;
+
+async function gameEnd(){
+  try{
+    let gameTime = Math.floor(Date.now() / 1000) - startTime;
+    let str_min = Math.floor(gameTime/60).toString();
+    let str_sec = (gameTime%60).toString();
+    let time_formated = str_min + "m" + str_sec + "s";
+
+    let args = [time_formated, gameMoves.length, gameMoves, game_id];
+    await client.connect();
+    let res = await client.query("UPDATE public.\"GameInst\" SET game_stats=\'{\"game_time: $1\",\"moves_played:$2\"}\', move_hist=$3 WHERE game_id=$4;", args);
+    console.table(res.rows);
+  }
+  catch (e){
+      console.log("OH NO!", e);
+  }
+  finally{
+      await client.end();
+  }
+}
+
+
+
+
+
+
+
 
 //
 // Server side checks
@@ -327,13 +374,18 @@ io.on("connection", (socket) => {
     chess_board[dest_board.y][dest_board.x] = ghost_piece.piece;
     chess_board[start_board.y][start_board.x] = "__";
 
+    gameMoves.push(start_board.x + start_board.y + ghost_piece.piece + dest_board.x + dest_board.y);
+
     // Special promote function
     if(ghost_piece.piece[1] == "P" && y_dest == 0) socket.emit("promote pawn", x_dest, y_dest);
     else if(turn == "W") turn = "B";
     else if(turn == "B") turn = "W";
     io.emit("game update", chess_board);
 
-    if(isEnemyCheckmate(color)) io.emit("checkmate", checkmated);
+    if(isEnemyCheckmate(color)) {
+      io.emit("checkmate", checkmated);
+      gameEnd();
+    }
   });
 
   // Promote pawn
@@ -341,11 +393,17 @@ io.on("connection", (socket) => {
     let color = promote_piece.piece[0];
     let promote_board = getBoardCoords(color, promote_piece.x, promote_piece.y);
     chess_board[promote_board.y][promote_board.x] = promote_piece.piece;
+
+    gameMoves[gameMoves.length-1][2] = promote_piece.piece;
+
     io.emit("game update", chess_board);
     if(turn == "W") turn = "B";
     else if(turn == "B") turn = "W";
 
-    if(isEnemyCheckmate(color)) io.emit("checkmate", checkmated);
+    if(isEnemyCheckmate(color)) {
+      io.emit("checkmate", checkmated);
+      gameEnd();
+    }
   });
 
   // Handle disconnects 
