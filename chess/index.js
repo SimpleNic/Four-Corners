@@ -6,13 +6,17 @@ import { Server } from "socket.io";
 import pg from 'pg';
 import dotenv from 'dotenv'; 
 
-dotenv.config();
-
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   connectionStateRecovery: {},
 });
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const __publicPath = join(__dirname, "public");
+app.use(express.static(__publicPath));
+
+dotenv.config({path: "../.env"});
 
 const CLIENT_ARGS = {
   user: process.env.DB_USER,
@@ -20,10 +24,6 @@ const CLIENT_ARGS = {
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
 };
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const __publicPath = join(__dirname, "public");
-app.use(express.static(__publicPath));
 
 
 
@@ -43,12 +43,13 @@ async function gameEnd(){
     let gameTime = Math.floor(Date.now() / 1000) - startTime;
     let str_min = Math.floor(gameTime/60).toString();
     let str_sec = (gameTime%60).toString();
-    let time_formated = str_min + "m" + str_sec + "s";
+    let game_time = "game_time: " + str_min + "m" + str_sec + "s";
+    let moves_played = "moves_played: " + gameMoves.length;
+    let game_stats = [game_time, moves_played]
 
-    let args = [time_formated, gameMoves.length, gameMoves, game_id];
+    let args = [game_stats, gameMoves, game_id];
     await client.connect();
-    let res = await client.query("UPDATE public.\"GameInst\" SET game_stats=\'{\"game_time: $1\",\"moves_played:$2\"}\', move_hist=$3 WHERE game_id=$4;", args);
-    console.table(res.rows);
+    await client.query("UPDATE public.\"GameInst\" SET game_stats=$1, move_hist=$2 WHERE game_id=$3;", args);
   }
   catch (e){
       console.log("OH NO!", e);
@@ -381,7 +382,7 @@ io.on("connection", (socket) => {
     chess_board[dest_board.y][dest_board.x] = ghost_piece.piece;
     chess_board[start_board.y][start_board.x] = "__";
 
-    gameMoves.push(start_board.x + start_board.y + ghost_piece.piece + dest_board.x + dest_board.y);
+    gameMoves.push(start_board.x.toString() + start_board.y.toString() + ghost_piece.piece + dest_board.x.toString() + dest_board.y.toString());
 
     // Special promote function
     if(ghost_piece.piece[1] == "P" && y_dest == 0) socket.emit("promote pawn", x_dest, y_dest);
@@ -401,7 +402,7 @@ io.on("connection", (socket) => {
     let promote_board = getBoardCoords(color, promote_piece.x, promote_piece.y);
     chess_board[promote_board.y][promote_board.x] = promote_piece.piece;
 
-    gameMoves[gameMoves.length-1][2] = promote_piece.piece;
+    gameMoves[gameMoves.length-1] = gameMoves[gameMoves.length-1][0] + gameMoves[gameMoves.length-1][1] + promote_piece.piece + gameMoves[gameMoves.length-1][4] + gameMoves[gameMoves.length-1][5];
 
     io.emit("game update", chess_board);
     if(turn == "W") turn = "B";

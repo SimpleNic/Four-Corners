@@ -1,5 +1,21 @@
+import express from "express";
+import { createServer } from "node:http";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import { Server } from "socket.io";
+
+const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  connectionStateRecovery: {},
+});
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const __publicPath = join(__dirname, "public");
+app.use(express.static(__publicPath));
+
 var playerRed = "R";
-var playerBlack = "Y";
+var playerBlack = "B";
 var currPlayer = playerRed;
 
 var gameOver = false;
@@ -9,10 +25,12 @@ var rows = 6;
 var columns = 7;
 var currColumns = []; 
 
-window.onload = function() 
-{
+io.on('connection', function(socket) {
+    socket.on("assign color", (assigned_color) => {
+        client_color = assigned_color;
+    });
     setGame();
-}
+});
 
 function setGame() 
 {
@@ -160,3 +178,20 @@ function setWinner(r, c)
     }
     gameOver = true;
 }
+
+function setColor(c)
+{
+    let color = document.getElementById("color");
+    if(assigned_color == 'R')
+    {
+        color.innerText = "You are Red";
+    }
+    else
+    {
+        color.innerText = "You are Black";
+    }
+}
+
+server.listen(3000, () => {
+    console.log("server running at http://localhost:3000");
+});

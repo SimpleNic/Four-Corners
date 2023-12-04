@@ -3,3 +3,4 @@
 * put whole code in a function
 * have function take paramerter game_id
 * remove all the imports
+* ensure that dotenv.config({path: "../.env"}); has the right path
