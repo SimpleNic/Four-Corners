@@ -14,12 +14,12 @@ const io = new Server(server, {
   connectionStateRecovery: {},
 });
 
-const client = new pg.Client({
+const CLIENT_ARGS = {
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
-});
+};
 
 process.env()
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -39,6 +39,7 @@ const gameMoves = [];
 var game_id = -1;
 
 async function gameEnd(){
+  let client = new pg.Client(CLIENT_ARGS);
   try{
     let gameTime = Math.floor(Date.now() / 1000) - startTime;
     let str_min = Math.floor(gameTime/60).toString();
