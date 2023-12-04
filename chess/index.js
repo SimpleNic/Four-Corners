@@ -26,9 +26,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const __publicPath = join(__dirname, "public");
 app.use(express.static(__publicPath));
 
+
+
 //
 // Postgresql
 //
+
+
 
 var startTime = Math.floor(Date.now() / 1000);
 const gameMoves = [];
@@ -56,14 +60,12 @@ async function gameEnd(){
 
 
 
-
-
-
-
-
 //
 // Server side checks
 //
+
+
+
 var turn = "W";
 var checkmated = "_";
 var pawn_can_be_enpassant = {
@@ -344,9 +346,14 @@ function isEnemyCheckmate(self_color){
   return true;
 }
 
+
+
 //
 // Socket.io stuff
 //
+
+
+
 io.on("connection", (socket) => {
   // Assign colors
   if(assigned_colors.length < 2){
