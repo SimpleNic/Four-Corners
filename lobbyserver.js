@@ -7,6 +7,8 @@ import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { Server } from "socket.io";
+import { workerData } from "node:worker_threads";
+import { start } from "node:repl";
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -22,8 +24,15 @@ function Lobby(host){
   this.addPlayer = function(player){
     this.hostee = player;
   }
+  this.id;
 
 
+}
+
+function Player(name){
+  this.name = name;
+  this.elo;
+  this.picture;
 }
 
 
@@ -74,6 +83,29 @@ async function createNewLobby(uname1, uname2){
   }
 }
 
+async function createNewGameInst(game){
+  try{
+    //console.log()
+    let res = await client.query(`with maxGame as (select Max(game_id) from "GameInst")
+    INSERT INTO public."GameInst"(
+      game_type, delta_elo1, delta_elo2, move_hist,game_id)
+      VALUES ('${game}', '10', '10','{""}',(select * from maxGame)+1);
+      `)
+
+  } catch(e){
+    console.log("ermmm",e)
+  }
+}
+
+async function createGameLobby(lobby,game){
+  try{
+    let res = await client.query(`INSERT INTO public."GameLobby"(
+      game_id,lobby_id) VALUES (${lobby},${game});`)
+  } catch{e}{
+    console.log("erororororrrrr",e)
+  }
+}
+
 async function getLobbyData(uname1,uname2){
   try{
     let res = await client.query(`SELECT lobby_id
@@ -85,9 +117,15 @@ async function getLobbyData(uname1,uname2){
       console.log("no such lobby")
       console.log(uname1); console.log(uname2);
       createNewLobby(uname1,uname2);
+      getLobbyData(uname1,uname2);
     } else {
       console.log("lobby found!")
       console.log(res.rows);
+      for(let i=0;i<lobbies.length;i++){
+        if(lobbies[i].host==uname1 && lobbies[i].hostee==uname2){
+          lobbies[i].id = res.rows;
+        }
+      }
     }
     return res.rows;
     //socket.emit("client_data",res.rows[0]);
@@ -165,6 +203,7 @@ io.on("connection", (socket) => {
 
       if(!exists){
         let newLobby = new Lobby(socketUser);
+        socket.join(`${socketUser}-room`);
         lobbies.push(newLobby);
       io.emit("lobby_update",{type:"new_lobby", new_lobby:newLobby});
       }
@@ -176,8 +215,11 @@ io.on("connection", (socket) => {
       for(let i=0;i<lobbies.length;i++){
         if(lobbies[i].host==l){
           lobbies[i].addPlayer(socketUser);
+          socket.join(`${lobbies[i].host}-room`);
+          io.to(`${lobbies[i].host}-room`).emit("roomtest!");
+          console.log(`${lobbies[i].host}-room`)
           console.log(`${socketUser} Joined ${l}'s lobby!`)
-          io.emit("lobby_update",{type:"lobby_full",host:l,hostee:lobbies[i].hostee});
+          io.to(`${lobbies[i].host}-room`).emit("lobby_update",{type:"lobby_full",host:l,hostee:lobbies[i].hostee});
         }
       }
     })
@@ -187,9 +229,23 @@ io.on("connection", (socket) => {
     })
 
 
-socket.on("get_lobby",(d)=>{
-  socket.emit("lobby_info",getLobbyData(d.u1,d.u2));
-})
+    socket.on("get_lobby",(d)=>{
+      socket.emit("lobby_info",getLobbyData(d.u1,d.u2));
+    })
+
+    socket.on("start_game",(g)=>{
+      console.log(g);
+      //only the host would start the game
+      //console.log(socketUser);
+      createNewGameInst(g);
+      //TODO: 
+      // need to get gamelobby table to worker
+      // just query gameinst since we will hopefully have lobby id already
+      // encode this data to url so games can use it to self-start
+      // have games update lobby on end 
+      // chat???
+      io.to(`${socketUser}-room`).emit("game_made",g)
+    })
 
    
 

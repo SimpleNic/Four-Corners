@@ -21,6 +21,9 @@ const avi = document.getElementById("avi");
 const uname = document.getElementById("uname");
 const makeLobby = document.getElementById("create-lobby");
 const lobbyList = document.getElementById("open-lobbies");
+const makeGameButton = document.getElementById("play-game-checkers");
+const joinGameLink = document.getElementById("join-game");
+const playerlist = document.getElementById("player-list")
 var hostPowers = false;
 loginButton.addEventListener("click",()=>{
 
@@ -32,6 +35,14 @@ makeLobby.addEventListener("click",()=>{
     if(loggedIn){
         createLobby();
     }
+})
+
+makeGameButton.addEventListener("click",()=>{
+    if(isHost){
+        socket.emit("start_game",makeGameButton.innerText.toLowerCase())
+    }
+
+
 })
 function login(uname){
     console.log(uname);
@@ -60,7 +71,7 @@ socket.on("login_success",u=>{
 socket.on("client_data",d=>{
     console.log(d);
     uname.innerText = `${d.u_name} ELO:${d.elo}`;
-    avi.src = `../img/${d.u_picture.slice(0,-4)}.png`
+    avi.src = `../public/img/${d.u_picture.slice(0,-4)}.png`
 })
 
 function joinLobby(host){
@@ -80,12 +91,15 @@ socket.on("lobby_update",u=>{
                 curLobby.hostee = u.hostee;
             if(u.host==username){
                 console.log("you are the host");
-                host = true;
+                isHost = true;
                 initLobby();
+                addPlayer(u.hostee);
             }
             if(u.hostee==username){
-                hostee = true;
+                isHostee = true;
                 console.log("you are the hostee");
+                addPlayer(u.host);
+                addPlayer(username);
             }
         
         }
@@ -104,12 +118,22 @@ socket.on("lobby_update",u=>{
         break;
     }
 
+    
+
 })
 
+socket.on("roomtest!",()=>{
+    console.log("only the cool kids got this one!");
+})
 
+socket.on("game_made",(game)=>{
+    joinGameLink.href = window.location.origin + `/${game}/${game}.html?${curLobby.host},${username}`
+    joinGameLink.innerText = "Join this game!";
+})
 
 function createLobby(){
     socket.emit("create_lobby");
+    addPlayer(username);
 }
 
 function lobbyUpdate(){
@@ -117,12 +141,19 @@ function lobbyUpdate(){
     socket.emit("lobby_populate");
 }
 
-
 function initLobby(){
     socket.emit("get_lobby",{u1:curLobby.host,u2:curLobby.hostee}) 
     socket.on("lobby_info",d=>{
         console.log(d);
     })
+
+}
+
+function addPlayer(p){
+    playerlist.innerHTML += `<p> ${p} </p>`
+}
+
+function createGame(){
 
 }
 
