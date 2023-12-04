@@ -21,7 +21,6 @@ const CLIENT_ARGS = {
   database: process.env.DB_NAME,
 };
 
-process.env()
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const __publicPath = join(__dirname, "public");
 app.use(express.static(__publicPath));
