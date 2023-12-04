@@ -26,6 +26,9 @@ var columns = 7;
 var currColumns = []; 
 
 io.on('connection', function(socket) {
+    socket.on("assign color", (assigned_color) => {
+        client_color = assigned_color;
+    });
     setGame();
 });
 
@@ -189,10 +192,6 @@ function setColor(c)
     }
 }
 
-io.sockets.on("assign color", (assigned_color) => {
-    client_color = assigned_color;
-})
-
 server.listen(3000, () => {
     console.log("server running at http://localhost:3000");
-  });
+});
