@@ -10,9 +10,13 @@ Create a .env file with
 npm install
 node index.js
 ```
+
+to use lobby: 
+node lobbyserver.js
+
 ### To Do
-* lobby creation screen/login screen
-* user profile screen
+* ~~lobby creation screen/login screen ~~
+* user profile screen - kinda done?
 * actual lobby screen
 * chess
 * checkers
