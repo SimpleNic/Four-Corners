@@ -8,11 +8,13 @@ Create a .env file with
 
 ```
 npm install
-node index.js
+node directory/index.js
 ```
 
 to use lobby: 
+```
 node lobbyserver.js
+```
 
 ### To Do
 * ~~lobby creation screen/login screen ~~
