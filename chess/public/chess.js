@@ -1,6 +1,16 @@
-const socket = io();
+const socket = io("localhost:3002", {
+    withCredentials: true,
+    extraHeaders: {
+      "Access-Control-Allow-Origin":'*'
+    }
+});
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
+
+const params = new URLSearchParams(window.location.search);
+const username = params.get("user");
+const lobby_id = params.get("lobby");
+const game_id = params.get("game");
 
 var is_down = false;
 var mouse_x = 0;
@@ -255,6 +265,8 @@ socket.on("promote pawn", (x, y) => {
 socket.on("checkmate", (checkmated_color) => {
     checkmated = checkmated_color;
 });
+
+socket.emit("login", {user:username,lobby:lobby_id,game:game_id})
 
 canvas.onmousedown = handleMouseDown;
 canvas.onmouseup = handleMouseUp;

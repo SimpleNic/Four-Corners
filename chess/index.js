@@ -25,11 +25,6 @@ const CLIENT_ARGS = {
   database: process.env.DB_NAME,
 };
 
-const params = new URLSearchParams(window.location.search);
-const username = params.get("user");
-const lobby_id = params.get("lobby");
-const game_id = params.get("game");
-
 
 
 //
@@ -60,6 +55,17 @@ async function gameEnd(){
   }
   finally{
       await client.end();
+  }
+}
+
+function GameLobby(game,lobby){
+  this.game = game;
+  this.lobby = lobby;
+  this.players = [];
+  this.addPlayer = function(player){
+      if(this.players.length<2 || !this.players.includes(player)){
+          this.players.push(player);
+      }
   }
 }
 
@@ -416,6 +422,12 @@ io.on("connection", (socket) => {
       io.emit("checkmate", checkmated);
       gameEnd();
     }
+  });
+
+  socket.on("login", (login_par) => {
+    let newGameLobby = new GameLobby(curGame,curLobby);
+    socket.join(`${login_par.lobby}-${login_par.game}`); 
+    io.to(`${login_par.lobby}-${login_par.game}`).emit("gamelobby", newGameLobby);
   });
 
   // Handle disconnects 

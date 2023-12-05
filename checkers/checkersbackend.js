@@ -117,8 +117,6 @@ io.on("connection",socket=>{
         console.log("gmae updated in sql?");
         
         io.to(`${curLobby}-${curGame}`).emit("setPlayerTurn",curGameLobby.players[curOpponent]);
-        
-
     })
 })
 
