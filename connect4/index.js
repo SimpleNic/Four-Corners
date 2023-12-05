@@ -3,6 +3,8 @@ import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { Server } from "socket.io";
+import pg from 'pg';
+import dotenv from 'dotenv'; 
 
 const app = express();
 const server = createServer(app);
@@ -19,6 +21,14 @@ const io = new Server(server, {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const __publicPath = join(__dirname, "public");
 app.use(express.static(__publicPath));
+
+dotenv.config({path: "../.env"});
+const CLIENT_ARGS = {
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+  };
 
 var aBoard = [[0,0,0,1,0,0,0],
                 [0,0,0,1,0,0,0],
@@ -55,6 +65,7 @@ io.on('connection', function(socket)
 
 async function sendGameStats()
 {
+    let client = new pg.Client(CLIENT_ARGS);
     let args = [aBoard, lobby_id];
     try
     {
