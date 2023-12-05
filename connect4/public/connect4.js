@@ -31,6 +31,7 @@ var board = [[0,0,0,0,0,0,0],
 
 function setGame(board) 
 {
+    socket.emit('lobby id', lobby_id);
     
     currColumns = [5, 5, 5, 5, 5, 5, 5];
     
