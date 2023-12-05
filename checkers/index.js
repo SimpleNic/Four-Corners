@@ -9,7 +9,8 @@ import { dirname, join } from "node:path";
 import { Server } from "socket.io";
 import { workerData } from "node:worker_threads";
 import { start } from "node:repl";
-dotenv.config({path: "../.env"});
+//dotenv.config({path: "../.env"});
+dotenv.config();
 const app = express();
 app.use(cors());
 const server = createServer(app);
@@ -18,15 +19,21 @@ var loggedInUsers = [];
 var gameLobbies = [];
 //let baseGame = 'dp_0-0,dp_0-1,dp_0-2,dp_0-3,dp_0-4,dp_0-5,dp_0-6,dp_0-7,dp_1-0,dp_1-1,dp_1-2,dp_1-3,dp_1-4,dp_1-5,dp_1-6,dp_1-7,lp_6-0,lp_6-1,lp_6-2,lp_6-3,lp_6-4,lp_6-5,lp_6-6,lp_6-7,lp_7-0,lp_7-1,lp_7-2,lp_7-3,lp_7-4,lp_7-5,lp_7-6,lp_7-7';
 let curGameState = '';
-const client = new pg.Client({
+// const client = new pg.Client({
+//     user: process.env.DB_USER,
+//     password: process.env.DB_PASS,
+//     host: process.env.DB_HOST,
+//     database: process.env.DB_NAME,
+//   })
+  //await client.connect();
+
+  const CLIENT_ARGS = {
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
-  })
-  await client.connect();
-
-
+  };
+  
 
   const io = new Server(server, {
     cors: {
@@ -121,9 +128,9 @@ io.on("connection",socket=>{
 })
 
 async function updateTurn(g,gid){
-    try{
-        
-        //await client.connect();
+    let client = new pg.Client(CLIENT_ARGS);
+    try{        
+        await client.connect();
         console.log(`game id ${gid}  \n state updated ${g}`);
         console.log(gid);
         console.log(g);
@@ -131,6 +138,9 @@ async function updateTurn(g,gid){
         await client.query("UPDATE public.\"GameInst\" set move_hist=array_append(move_hist,$1) WHERE game_id=$2;", args);
     } catch(e){
         console.log("update error",e);
+    }
+    finally{
+        await client.end();
     }
 }
 

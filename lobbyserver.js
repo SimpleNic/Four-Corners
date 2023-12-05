@@ -240,6 +240,9 @@ io.on("connection", (socket) => {
 
 
     socket.on("get_lobby",(d)=>{
+      // get chats
+      //read them all 
+      // let chatLogs = getChats()
       socket.emit("lobby_info",getLobbyData(d.u1,d.u2));
       curLobby = getLobbyData(d.u1,d.u2);
       console.log("the curlobby is... "+curLobby);
@@ -279,17 +282,57 @@ io.on("connection", (socket) => {
     socket.on('chat message', (m) => {
       console.log('message: ' + m.msg);
       console.log(currentLobby.host);
-      // curLobby.then(()=>{
-      // })
-      //console.log(c)
+      //let currentLobby = 
+      curLobby.then((c)=>{
+        console.log("lol");
+        console.log(c)
+        sendChat(m.msg,c);
+      })
+      
+      
       io.to(`${currentLobby.host}-room`).emit('received-msg',{msg:m.user+": "+m.msg,avi:m.avi});
     });
+
+    
 
     
 
 
 
 })
+
+
+
+async function sendChat(chat,id){
+  try{
+    let res = await client.query(`SELECT lobby_id
+    FROM public."Chat"
+    WHERE lobby_id=${id};` );
+    console.log(res.rows);
+    if(res.rows.length == 0){
+      console.log("no such chat lobby")
+      try{ 
+        let args = [id]
+        await client.query("INSERT INTO public.\"Chat\"(lobby_id) VALUES ($1);",args);
+        console.log("sent chat to db");
+      }catch(e){
+          console.log("erm...",e)
+        }
+     // createNewLobby(uname1,uname2);
+    //return getLobbyData(uname1,uname2);
+    } 
+    let args = [chat,id]
+    await client.query("UPDATE public.\"Chat\" set chat_hist=array_append(chat_hist,$1) WHERE lobby_id=$2;",args);
+    console.log("sent chat to db");
+  } catch(e){
+    console.log("erm...",e)
+  }
+}
+
+async function getChats(id){
+
+}
+
 
 
 

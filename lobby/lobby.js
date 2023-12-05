@@ -149,7 +149,7 @@ socket.on("lobby_update",u=>{
         case "lobby_full":
             console.log("hmm...");
             console.log("the host is: "+u.host);
-            fullLobby = true;
+           // fullLobby = true;
             if(lobbyEmpty){
                 lobbyEmpty = false;
                 curLobby.host = u.host;
@@ -163,6 +163,7 @@ socket.on("lobby_update",u=>{
             if(u.hostee==username){
                 isHostee = true;
                 console.log("you are the hostee");
+                initLobby();
                 addPlayer(u.host);
                 addPlayer(username);
             }
@@ -196,6 +197,10 @@ socket.on("game_made",(game)=>{
     joinGameLink.innerText = "Join this game!";
 })
 
+socket.on("chat-ready",()=>{
+    fullLobby = true;
+})
+
 function createLobby(){
     socket.emit("create_lobby");
     addPlayer(username);
@@ -207,12 +212,12 @@ function lobbyUpdate(){
 }
 
 function initLobby(){
+    fullLobby = true;
     socket.emit("get_lobby",{u1:curLobby.host,u2:curLobby.hostee}) 
     console.log("getting lobbyyyy");
     socket.on("lobby_info",d=>{
         console.log(d);
     })
-
 }
 
 function addPlayer(p){
