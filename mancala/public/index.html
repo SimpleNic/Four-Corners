@@ -13,9 +13,14 @@
         <div class="result" id="result"></div>
     </div>
     <!-- Include the Socket.IO script -->
-    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
     <script>
-        const socket = io();
+        const socket = io("localhost:3004", {
+            withCredentials: true,
+            extraHeaders: {
+            "Access-Control-Allow-Origin":'*'
+            }
+        });
     </script>
     <script src="mancala.js"></script>
 </body>

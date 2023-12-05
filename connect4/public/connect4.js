@@ -6,7 +6,7 @@ const socket = io("localhost:3003", {
   });
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
-
+const params = new URLSearchParams(window.location.search);
 var playerRed = "R";
 var playerBlack = "B";
 var currPlayer = playerRed;
@@ -20,6 +20,10 @@ var currColumns = [];
 var x;
 var y;
 
+const username = params.get("user");
+const lobby_id = params.get("lobby");
+const game_id = params.get("game");
+
 var board = [[0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0],
@@ -29,6 +33,7 @@ var board = [[0,0,0,0,0,0,0],
 
 function setGame(board) 
 {
+    socket.emit('lobby id', lobby_id);
     
     currColumns = [5, 5, 5, 5, 5, 5, 5];
     
