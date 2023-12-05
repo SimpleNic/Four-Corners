@@ -1,18 +1,33 @@
-const express = require('express');
-const http = require('http');
-const socketIO = require('socket.io');
-const path = require('path');
+import express from "express";
+import { createServer } from "node:http";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import { Server } from "socket.io";
+import pg from 'pg';
+import dotenv from 'dotenv'; 
 
 
 const app = express();
-const server = http.createServer(app);
-const io = socketIO(server);
+const server = createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: true,
+        methods: ["GET", "POST"],
+        allowedHeaders: ["Access-Control-Allow-Origin"],
+        credentials: true,
+      },
+  connectionStateRecovery: {},
+  });
 
 
 const PORT = process.env.PORT || 3000;
 
 
-app.use(express.static(path.join(__dirname, 'public')));
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const __publicPath = join(__dirname, "public");
+app.use(express.static(__publicPath));
+
+dotenv.config({path: "../.env"});
 
 
 let startBoard = Array(14).fill(4);
@@ -28,7 +43,7 @@ io.on('connection', (socket) => {
 
     socket.on('move', ({ pitIndex, startBoard, currentPlayer }) => {
 
-        console.log('The move has been receieved from ${username} in lobby ${lobby_id} for the game ${game_id} ');
+        console.log(`The move has been receieved from ${username} in lobby ${lobby_id} for the game ${game_id}`);
 
         io.emit('updation', { startBoard, currentPlayer });
 
