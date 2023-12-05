@@ -20,7 +20,7 @@ const io = new Server(server, {
   });
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3004;
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -43,7 +43,6 @@ io.on('connection', (socket) => {
 
     socket.on('move', ({ pitIndex, startBoard, currentPlayer }) => {
 
-        console.log(`The move has been receieved from ${username} in lobby ${lobby_id} for the game ${game_id}`);
 
         io.emit('updation', { startBoard, currentPlayer });
 
