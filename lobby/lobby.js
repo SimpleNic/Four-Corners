@@ -14,6 +14,8 @@ const socket = io("localhost:3000", {
       "Access-Control-Allow-Origin":'*'
     }
   });
+
+
 var login_status = document.getElementById("login-status");
 const loginButton = document.getElementById("login-button")
 const loginField = document.getElementById("login-field");
@@ -22,6 +24,9 @@ const uname = document.getElementById("uname");
 const makeLobby = document.getElementById("create-lobby");
 const lobbyList = document.getElementById("open-lobbies");
 const makeGameButton = document.getElementById("play-game-checkers");
+const makeGameButton2 = document.getElementById("play-game-chess");
+const makeGameButton3 = document.getElementById("play-game-mancala");
+const makeGameButton4 = document.getElementById("play-game-connect4");
 const joinGameLink = document.getElementById("join-game");
 const playerlist = document.getElementById("player-list")
 var hostPowers = false;
@@ -40,6 +45,27 @@ makeLobby.addEventListener("click",()=>{
 makeGameButton.addEventListener("click",()=>{
     if(isHost){
         socket.emit("start_game",makeGameButton.innerText.toLowerCase())
+    }
+
+
+})
+makeGameButton2.addEventListener("click",()=>{
+    if(isHost){
+        socket.emit("start_game",makeGameButton2.innerText.toLowerCase())
+    }
+
+
+})
+makeGameButton3.addEventListener("click",()=>{
+    if(isHost){
+        socket.emit("start_game",makeGameButton3.innerText.toLowerCase())
+    }
+
+
+})
+makeGameButton4.addEventListener("click",()=>{
+    if(isHost){
+        socket.emit("start_game",makeGameButton4.innerText.toLowerCase())
     }
 
 
@@ -127,7 +153,7 @@ socket.on("roomtest!",()=>{
 })
 
 socket.on("game_made",(game)=>{
-    joinGameLink.href = window.location.origin + `/${game.game}/${game.game}.html?user=${username}&lobby=${game.lobby_id}&game=${game.game_id}`
+    joinGameLink.href = window.location.origin + `/${game.game}/public/index.html?user=${username}&lobby=${game.lobby_id}&game=${game.game_id}`
     joinGameLink.innerText = "Join this game!";
 })
 
