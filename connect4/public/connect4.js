@@ -20,6 +20,8 @@ var currColumns = [];
 var x;
 var y;
 
+var lobby_id = params.get("lobby");
+
 var board = [[0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0],
@@ -29,6 +31,7 @@ var board = [[0,0,0,0,0,0,0],
 
 function setGame(board) 
 {
+    socket.emit('lobby id', lobby_id);
     
     currColumns = [5, 5, 5, 5, 5, 5, 5];
     
