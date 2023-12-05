@@ -6,22 +6,12 @@ Create a .env file with
 * DB_HOST
 * DB_NAME
 
+run
 ```
 npm install
-node directory/index.js
-```
-
-to use lobby: 
-```
 node lobbyserver.js
 ```
-
-### To Do
-* ~~lobby creation screen/login screen ~~
-* user profile screen - kinda done?
-* actual lobby screen
-* chess
-* checkers
-* connect4
-* mancala
-* Connecting it all
+run the next section of code from checkers, chess, connect4, and mancala directories
+```
+node index.js
+```
