@@ -9,7 +9,7 @@ import { dirname, join } from "node:path";
 import { Server } from "socket.io";
 import { workerData } from "node:worker_threads";
 import { start } from "node:repl";
-dotenv.config();
+dotenv.config({path: "../.env"});
 const app = express();
 app.use(cors());
 const server = createServer(app);
