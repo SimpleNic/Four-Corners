@@ -279,9 +279,8 @@ io.on("connection", (socket) => {
     socket.on('chat message', (m) => {
       console.log('message: ' + m.msg);
       console.log(currentLobby.host);
-      curLobby.then(()=>{
-        
-      })
+      // curLobby.then(()=>{
+      // })
       //console.log(c)
       io.to(`${currentLobby.host}-room`).emit('received-msg',{msg:m.user+": "+m.msg,avi:m.avi});
     });

@@ -7,6 +7,12 @@ import { Server } from "socket.io";
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
+    cors: {
+        origin: true,
+        methods: ["GET", "POST"],
+        allowedHeaders: ["Access-Control-Allow-Origin"],
+        credentials: true,
+      },
   connectionStateRecovery: {},
 });
 
@@ -43,7 +49,7 @@ io.on('connection', function(socket)
     });
 });
 
-server.listen(3000, () => {
-    console.log("server running at http://localhost:3000");
+server.listen(3003, () => {
+    console.log("server running at http://localhost:3003");
 });
 
