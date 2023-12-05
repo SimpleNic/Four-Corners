@@ -25,6 +25,11 @@ const CLIENT_ARGS = {
   database: process.env.DB_NAME,
 };
 
+const params = new URLSearchParams(window.location.search);
+const username = params.get("user");
+const lobby_id = params.get("lobby");
+const game_id = params.get("game");
+
 
 
 //
@@ -35,7 +40,6 @@ const CLIENT_ARGS = {
 
 var startTime = Math.floor(Date.now() / 1000);
 const gameMoves = [];
-var game_id = -1;
 
 async function gameEnd(){
   let client = new pg.Client(CLIENT_ARGS);
@@ -432,6 +436,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("server running at http://localhost:3000");
+server.listen(3002, () => {
+  console.log("server running at http://localhost:3002");
 });

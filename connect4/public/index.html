@@ -6,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Connect 4</title>
     <link rel="stylesheet" href="connect4.css">
-    <script src="socket.io/socket.io.js"></script>
-    <script src="connect4.js"></script>
 </head>
 <body>
     <h1>Connect 4</h1>
     <h2 id="winner"></h2>
+    <canvas id="game-canvas" width="630" height="540"></canvas>
     <div id="board"></div>
+
+    <script src="socket.io/socket.io.js"></script>
+    <script src="connect4.js"></script>
 </body>
 </html>
