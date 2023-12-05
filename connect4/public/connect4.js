@@ -20,6 +20,8 @@ var currColumns = [];
 var x;
 var y;
 
+var lobby_id = params.get("lobby");
+
 var board = [[0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0],

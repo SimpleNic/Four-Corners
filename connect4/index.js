@@ -33,7 +33,7 @@ var clearBoard = [[0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0]];
-
+var lobby_id;
 
 io.on('connection', function(socket) 
 {
@@ -42,14 +42,29 @@ io.on('connection', function(socket)
     socket.on('next turn', (server_board) =>{
         aBoard = server_board.slice();
         io.emit('onload board', aBoard);
+        sendGameStats();
     });
     socket.on('winner', (server_board) => {
         aBoard = server_board.slice();
         io.emit('winner reset', aBoard);
     });
+    socket.on('lobby_id', (server_lobby_id) => {
+        lobby_id = server_lobby_id.slice();
+    })
 });
+
+async function sendGameStats()
+{
+    let args = [aBoard, lobby_id];
+    try
+    {
+        await client.query("UPDATE public.\"GameInst\" set move_hist=array_append(move_hist,$1) WHERE game_id=$2;", args);
+    }
+    catch(e){
+        console.log("update error",e);
+    }
+}
 
 server.listen(3003, () => {
     console.log("server running at http://localhost:3003");
 });
-
