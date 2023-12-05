@@ -244,7 +244,7 @@ socket.on("game update", (chess_board_server) => {
 
 socket.on("assign color", (assigned_color) => {
     client_color = assigned_color;
-})
+});
 
 socket.on("promote pawn", (x, y) => {
     pawn_promoted = true;
