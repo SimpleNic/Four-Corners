@@ -71,7 +71,7 @@ socket.on("login_success",u=>{
 socket.on("client_data",d=>{
     console.log(d);
     uname.innerText = `${d.u_name} ELO:${d.elo}`;
-    avi.src = `../public/img/${d.u_picture.slice(0,-4)}.png`
+    avi.src = `../img/${d.u_picture.slice(0,-4)}.png`
 })
 
 function joinLobby(host){
@@ -127,7 +127,7 @@ socket.on("roomtest!",()=>{
 })
 
 socket.on("game_made",(game)=>{
-    joinGameLink.href = window.location.origin + `/${game}/${game}.html?${curLobby.host},${username}`
+    joinGameLink.href = window.location.origin + `/${game.game}/${game.game}.html?user=${username}&lobby=${game.lobby_id}&game=${game.game_id}`
     joinGameLink.innerText = "Join this game!";
 })
 
@@ -143,6 +143,7 @@ function lobbyUpdate(){
 
 function initLobby(){
     socket.emit("get_lobby",{u1:curLobby.host,u2:curLobby.hostee}) 
+    console.log("getting lobbyyyy");
     socket.on("lobby_info",d=>{
         console.log(d);
     })

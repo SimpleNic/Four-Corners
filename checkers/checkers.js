@@ -1,15 +1,21 @@
 document.on
 var board;
-var baseGame = 'dp_0-0,dp_0-1,dp_0-2,dp_0-3,dp_0-4,dp_0-5,dp_0-6,dp_0-7,dp_1-0,dp_1-1,dp_1-2,dp_1-3,dp_1-4,dp_1-5,dp_1-6,dp_1-7,lp_6-0,lp_6-1,lp_6-2,lp_6-3,lp_6-4,lp_6-5,lp_6-6,lp_6-7,lp_7-0,lp_7-1,lp_7-2,lp_7-3,lp_7-4,lp_7-5,lp_7-6,lp_7-7';
+//var baseGame = 'dp_0-0,dp_0-1,dp_0-2,dp_0-3,dp_0-4,dp_0-5,dp_0-6,dp_0-7,dp_1-0,dp_1-1,dp_1-2,dp_1-3,dp_1-4,dp_1-5,dp_1-6,dp_1-7,lp_6-0,lp_6-1,lp_6-2,lp_6-3,lp_6-4,lp_6-5,lp_6-6,lp_6-7,lp_7-0,lp_7-1,lp_7-2,lp_7-3,lp_7-4,lp_7-5,lp_7-6,lp_7-7';
 var baseGameState = ""
 var username = "gamer1";
-var turn = true;
+var opponent;
+var lobby_id;
+var game_id;
+var turn_indicator;
+
+var turn = false;
 var selectedPeice;
 var newPos;
 var homePeice = 'lp';
 var red = [];
 var enemyPeice = 'dp';
-const socket = io("localhost:3000", {
+
+const socket = io("localhost:3001", {
   withCredentials: true,
   extraHeaders: {
     "Access-Control-Allow-Origin":'*'
@@ -17,7 +23,8 @@ const socket = io("localhost:3000", {
 });
 document.addEventListener("DOMContentLoaded", function(){
     //....
-
+turn_indicator = document.getElementById("cur-turn");
+color_indicator = document.getElementById("cur-color");
 board = document.getElementById('board');
 
 for (let i = 0; i < 8; i++) {
@@ -55,8 +62,14 @@ for (let i = 0; i < 8; i++) {
 }
 baseGameState = baseGameState.slice(0,-1);
 
- updateBoard(baseGameState)
+const params = new URLSearchParams(window.location.search);
+username = params.get("user");
+lobby_id = params.get("lobby");
+game_id = params.get("game");
 
+socket.emit("login",{user:username,lobby:lobby_id,game:game_id});
+ updateBoard(baseGameState)
+ //socket.emit("start_game")
 
 });
 
@@ -85,6 +98,8 @@ var test;
 var placing = false;
 var myTurn = true;
 function boxClicked(spot){
+   
+   if(turn){
     console.log(spot.id);
     console.log(spot.innerText);
     let selPosStr = spot.id;
@@ -99,9 +114,14 @@ function boxClicked(spot){
             red[i].innerText = selectedPeice.innerText;
             selectedPeice.innerText = "";
             console.log(writeGameState());
+            socket.emit("made_turn",{state:writeGameState(),player:username});
+            turn = false;
+            console.log("turn made");
             break;
         }
     }
+
+    console.log("hmm");
     
     clearRed();
     
@@ -147,6 +167,7 @@ function boxClicked(spot){
        
     }
     console.log(red);
+    }
 
 
     
@@ -198,10 +219,50 @@ function clearRed(){
 
 }
 
-socket.on("hello!",(e)=>{
-    console.log(e);
+socket.on("game_update",u=>{
+    console.log("got a socket update!");
+    updateBoard(u);
 })
 
-function login(){
-    socket.emit("login",username);
-}
+socket.on("hello",()=>{
+    console.log("hi!")
+})
+
+socket.on("gamelobby",(g)=>{
+    console.log(g.players);
+})
+
+socket.on("set_turn",(t)=>{
+    turn = t;
+    console.log("setting turn!");
+    if(t){
+        turn_indicator.innerText = "It's your turn!";
+
+    } else {
+        turn_indicator.innerText = "It's not your turn yet";
+    }
+})
+
+socket.on("setPlayerTurn",(p)=>{
+    console.log(p);
+    if(p==username){
+    if(turn){
+        turn = false;
+        turn_indicator.innerText = "It's not your turn yet";
+    } else {
+        turn = true;
+        turn_indicator.innerText = "It's your turn!";
+        }
+    }
+})
+
+socket.on("assign_color",(c)=>{
+    homePeice = c;
+    color_indicator.innerText = `Your color is ${c}`;
+    //console.log("i am:")
+})
+
+// function login(){
+//     socket.emit("login",username);
+// }
+

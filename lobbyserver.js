@@ -90,7 +90,11 @@ async function createNewGameInst(game){
     INSERT INTO public."GameInst"(
       game_type, delta_elo1, delta_elo2, move_hist,game_id)
       VALUES ('${game}', '10', '10','{""}',(select * from maxGame)+1);
+      with maxGame as (select Max(game_id) from "GameInst")
+    SELECT game_id FROM public."GameInst" where game_id=(select * from maxGame);
       `)
+      console.log(res[1].rows);
+      return res[1].rows[0].game_id;
 
   } catch(e){
     console.log("ermmm",e)
@@ -101,7 +105,7 @@ async function createGameLobby(lobby,game){
   try{
     let res = await client.query(`INSERT INTO public."GameLobby"(
       game_id,lobby_id) VALUES (${lobby},${game});`)
-  } catch{e}{
+  } catch(e){
     console.log("erororororrrrr",e)
   }
 }
@@ -117,17 +121,20 @@ async function getLobbyData(uname1,uname2){
       console.log("no such lobby")
       console.log(uname1); console.log(uname2);
       createNewLobby(uname1,uname2);
-      getLobbyData(uname1,uname2);
+      return getLobbyData(uname1,uname2);
     } else {
+      //let curLobby;
       console.log("lobby found!")
-      console.log(res.rows);
+      console.log(res.rows[0].lobby_id);
       for(let i=0;i<lobbies.length;i++){
         if(lobbies[i].host==uname1 && lobbies[i].hostee==uname2){
-          lobbies[i].id = res.rows;
+          lobbies[i].id = res.rows[0].lobby_id;
+         // curLobby = res.rows[0].lobby_id;
         }
       }
+      return res.rows[0].lobby_id;
     }
-    return res.rows;
+    //return res.rows;
     //socket.emit("client_data",res.rows[0]);
     }
     catch (e){
@@ -137,10 +144,11 @@ async function getLobbyData(uname1,uname2){
 }
 
 
-
 io.on("connection", (socket) => {
   let socketUser = '';
   let loggedIn = false;
+  let curGameInst;
+  let curLobby;
     console.log(`Socket connected! ${socket}`)  
     //console.log(socket);
     //clients.push(socket.id);
@@ -231,20 +239,39 @@ io.on("connection", (socket) => {
 
     socket.on("get_lobby",(d)=>{
       socket.emit("lobby_info",getLobbyData(d.u1,d.u2));
+      curLobby = getLobbyData(d.u1,d.u2);
+      console.log("the curlobby is... "+curLobby);
     })
 
     socket.on("start_game",(g)=>{
       console.log(g);
       //only the host would start the game
       //console.log(socketUser);
-      createNewGameInst(g);
+       console.log("Lobby for "+socketUser+" is:")//+curLobby);
+      // curLobby.then((v)=>{
+      //   console.log(v);
+      // })
+      curGameInst = createNewGameInst(g);
+      console.log("GameInst for "+socketUser+" is:")//+curGameInst);
+
+      Promise.all([curLobby,curGameInst]).then((values)=>{
+        console.log(values);
+        let lobbyID = values[0];
+        let gameID = values[1];
+        console.log('erm,,,');
+        console.log(lobbyID);
+        console.log(gameID);
+        createGameLobby(gameID,lobbyID);
+        io.to(`${socketUser}-room`).emit("game_made",{game:g,lobby_id:lobbyID,game_id:gameID});
+      })
+      
       //TODO: 
       // need to get gamelobby table to worker
       // just query gameinst since we will hopefully have lobby id already
       // encode this data to url so games can use it to self-start
       // have games update lobby on end 
       // chat???
-      io.to(`${socketUser}-room`).emit("game_made",g)
+     
     })
 
    
@@ -252,6 +279,8 @@ io.on("connection", (socket) => {
 
 
 })
+
+
 
 
 
