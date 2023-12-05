@@ -1,23 +1,49 @@
-const startBoard = Array(14).fill(4); // 14 pits, each with 4 stones
-startBoard[6] = 0; // Player 1's store
-startBoard[13] = 0; // Player 2's store
-
+let startBoard = Array(14).fill(4);
+startBoard[6] = 0;
+startBoard[13] = 0;
 let currentPlayer = 1;
+let localPlayerTurn = 1; 
+let gameOver = false; 
 
-const boardElem = document.getElementById('board');
-const resultElem = document.getElementById('result');
-const turnElem = document.getElementById('turn');
+const params = new URLSearchParams(window.location.search);
+username = params.get("user");
+lobby_id = params.get("lobby");
+game_id = params.get("game");
+
+const boardElem = document.getElementById("board");
+const resultElem = document.getElementById("result");
+const turnElem = document.getElementById("turn");
+
+
+function createPit(index) {
+    const pitElem = document.createElement("div");
+    pitElem.classList.add("pit");
+    pitElem.textContent = startBoard[index];
+    pitElem.addEventListener("click", () => move(index));
+    return pitElem;
+}
+
 
 startBoard.forEach((stones, index) => {
-    const pitElem = document.createElement('div');
-    pitElem.classList.add('pit');
-    pitElem.textContent = stones;
-    pitElem.addEventListener('click', () => move(index));
-    boardElem.appendChild(pitElem);
+    boardElem.appendChild(createPit(index));
 });
 
+
+function boardUpdate() {
+    const pitElem = document.querySelectorAll(".pit");
+    pitElem.forEach((pit, index) => {
+        pit.textContent = startBoard[index];
+    });
+}
+
+
+function turnUpdate() {
+    turnElem.textContent = `Turn: Player ${currentPlayer}`;
+}
+
+
 function move(pitIndex) {
-    if (pitIndex === 6 || pitIndex === 13) {
+    if (gameOver || pitIndex === 6 || pitIndex === 13 || currentPlayer !== localPlayerTurn) {
         return;
     }
 
@@ -37,53 +63,73 @@ function move(pitIndex) {
         currentIndex++;
     }
 
-    if (
-        (currentPlayer === 1 && currentIndex % 14 >= 1 && currentIndex % 14 <= 6 && startBoard[currentIndex % 14] === 1) ||
-        (currentPlayer === 2 && currentIndex % 14 >= 8 && currentIndex % 14 <= 13 && startBoard[currentIndex % 14] === 1)
-    ) {
-        const opposingPit = 13 - currentIndex % 14;
-        const stoneCollection = startBoard[currentIndex % 14] + startBoard[opposingPit];
-        startBoard[currentIndex % 14] = 0;
-        startBoard[opposingPit] = 0;
-        startBoard[currentPlayer === 1 ? 6 : 13] += stoneCollection;
+    if ((currentPlayer === 1 && currentIndex % 14 >= 1 && currentIndex % 14 <= 6 && startBoard[currentIndex % 14] === 1) ||
+        (currentPlayer === 2 && currentIndex % 14 >= 8 && currentIndex % 14 <= 13 && startBoard[currentIndex % 14] === 1)) {
+            const opposingPit = 13 - currentIndex % 14;
+            const stoneCollection = startBoard[currentIndex % 14] + startBoard[opposingPit];
+            startBoard[currentIndex % 14] = 0;
+            startBoard[opposingPit] = 0;
+            startBoard[currentPlayer === 1 ? 6 : 13] += stoneCollection;
     }
 
-    currentPlayer = 3 - currentPlayer;
+    isGameOver();
 
-    updateBoardDisplay();
-    updateTurnIndicator();
+    if (!gameOver) {
+        currentPlayer = 3 - currentPlayer;
+        localPlayerTurn = currentPlayer; 
+        turnUpdate();
+    }
 
+    boardUpdate();
+
+    socket.emit('move', { pitIndex, startBoard, currentPlayer });
+}
+
+
+function isGameOver() {
     const player1Empty = startBoard.slice(0, 6).every(stones => stones === 0);
     const player2Empty = startBoard.slice(7, 13).every(stones => stones === 0);
 
     if (player1Empty || player2Empty) {
         endGame();
-        return;
     }
 }
 
+
 function endGame() {
+    gameOver = true;
     const p1Stones = startBoard.slice(0, 6).reduce((sum, stones) => sum + stones, 0);
     const p2Stones = startBoard.slice(7, 13).reduce((sum, stones) => sum + stones, 0);
 
     if (p1Stones > p2Stones) {
-        resultElem.textContent = "Player 1 wins!";
+        resultElem.textContent = "Congratulations Player 1, you win!";
     } else if (p2Stones > p1Stones) {
-        resultElem.textContent = "Player 2 wins!";
+        resultElem.textContent = "Congratulations Player 2, you win!";
     } else {
-        resultElem.textContent = "It's a tie!";
+        resultElem.textContent = "Everyone Wins!";
     }
-
     resultElem.style.color = "#ffffff";
 }
 
-function updateBoardDisplay() {
-    const pitElem = document.querySelectorAll('.pit');
-    pitElem.forEach((pit, index) => {
-        pit.textContent = startBoard[index];
-    });
-}
+socket.on('start', ({ startBoard: initialBoard, currentPlayer: initialPlayer }) => {
+    startBoard = initialBoard;
+    currentPlayer = initialPlayer;
+    localPlayerTurn = currentPlayer;
 
-function updateTurnIndicator() {
-    turnElem.textContent = `Turn: Player ${currentPlayer}`;
-}
+    boardUpdate();
+    turnUpdate();
+});
+
+
+socket.on('updation', ({ startBoard: updatedBoard, currentPlayer: updatedPlayer }) => {
+    startBoard = updatedBoard;
+    currentPlayer = updatedPlayer;
+    localPlayerTurn = currentPlayer;
+    boardUpdate();
+    turnUpdate();
+});
+
+
+socket.on('gameOver', (message) => {
+    endGame();
+});

@@ -431,7 +431,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("login", (login_par) => {
-    let newGameLobby = new GameLobby(curGame,curLobby);
+    let newGameLobby = new GameLobby(login_par.game,login_par.lobby);
     socket.join(`${login_par.lobby}-${login_par.game}`); 
     io.to(`${login_par.lobby}-${login_par.game}`).emit("gamelobby", newGameLobby);
   });
