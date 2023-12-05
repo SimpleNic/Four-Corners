@@ -122,11 +122,12 @@ io.on("connection",socket=>{
 
 async function updateTurn(g,gid){
     try{
-        let args = [g.state, gid];
+        
         //await client.connect();
         console.log(`game id ${gid}  \n state updated ${g}`);
         console.log(gid);
         console.log(g);
+        let args = [g.state, gid];
         await client.query("UPDATE public.\"GameInst\" set move_hist=array_append(move_hist,$1) WHERE game_id=$2;", args);
     } catch(e){
         console.log("update error",e);

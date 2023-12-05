@@ -17,6 +17,7 @@
         body{
             background-color: lightgoldenrodyellow;
         }
+        #messages { list-style-type: none; margin: 0; padding: 0; }
     </style>
     <title>Lobby</title>
 </head>
@@ -51,7 +52,7 @@
         <div style="display: flex;justify-content: center;">
         <button class="playgame btn btn-dark"id="play-game-checkers"> Checkers </button>
         <button class="playgame btn btn-dark"id="play-game-chess"> Chess </button>
-        <button class="playgame btn btn-dark"id="play-game-connect4"> Connect 4 </button>
+        <button class="playgame btn btn-dark"id="play-game-connect4"> Connect4 </button>
         <button class="playgame btn btn-dark"id="play-game-mancala"> Mancala </button>
         </div>
         <div id="player-list">
@@ -60,6 +61,14 @@
         <div id="game"  style="text-align: center;">
             <a id="join-game" href="http://127.0.0.1:5500/checkers/checkers.html?meow,test" target="_blank" style="text-align: center;"></a>
         </div>
+        <div style="display: flex;justify-content: center;">
+        <div id="chat">
+        <ul id="messages"></ul>
+        <form id="chat-form" action="">
+          <input id="input" autocomplete="off" /><button>Send</button>
+        </form>
+    </div>
+</div>
     </div>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
     <script src="lobby.js"></script>

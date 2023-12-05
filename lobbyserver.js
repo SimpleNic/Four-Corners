@@ -16,6 +16,7 @@ const server = createServer(app);
 var clients = [];
 var loggedInUsers = [];
 var lobbies = [];
+var currentLobby;
 
 function Lobby(host){
   this.host = host;
@@ -212,6 +213,7 @@ io.on("connection", (socket) => {
       if(!exists){
         let newLobby = new Lobby(socketUser);
         socket.join(`${socketUser}-room`);
+        currentLobby = newLobby;
         lobbies.push(newLobby);
       io.emit("lobby_update",{type:"new_lobby", new_lobby:newLobby});
       }
@@ -224,10 +226,10 @@ io.on("connection", (socket) => {
         if(lobbies[i].host==l){
           lobbies[i].addPlayer(socketUser);
           socket.join(`${lobbies[i].host}-room`);
-          io.to(`${lobbies[i].host}-room`).emit("roomtest!");
-          console.log(`${lobbies[i].host}-room`)
+          currentLobby = lobbies[i];
           console.log(`${socketUser} Joined ${l}'s lobby!`)
           io.to(`${lobbies[i].host}-room`).emit("lobby_update",{type:"lobby_full",host:l,hostee:lobbies[i].hostee});
+
         }
       }
     })
@@ -274,7 +276,17 @@ io.on("connection", (socket) => {
      
     })
 
-   
+    socket.on('chat message', (m) => {
+      console.log('message: ' + m.msg);
+      console.log(currentLobby.host);
+      curLobby.then(()=>{
+        
+      })
+      //console.log(c)
+      io.to(`${currentLobby.host}-room`).emit('received-msg',{msg:m.user+": "+m.msg,avi:m.avi});
+    });
+
+    
 
 
 
