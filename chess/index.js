@@ -9,7 +9,13 @@ import dotenv from 'dotenv';
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
-  connectionStateRecovery: {},
+  cors: {
+      origin: true,
+      methods: ["GET", "POST"],
+      allowedHeaders: ["Access-Control-Allow-Origin"],
+      credentials: true,
+    },
+connectionStateRecovery: {},
 });
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
