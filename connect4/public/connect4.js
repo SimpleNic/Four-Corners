@@ -1,4 +1,9 @@
-const socket = io();
+const socket = io("localhost:3003", {
+    withCredentials: true,
+    extraHeaders: {
+      "Access-Control-Allow-Origin":'*'
+    }
+  });
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 
