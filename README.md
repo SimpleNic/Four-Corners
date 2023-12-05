@@ -36,4 +36,5 @@ Once another user joins your lobby, select the game and a link will show.
 ![image](https://github.com/SimpleNic/Four-Corners/assets/25697454/fe703b6a-30fe-4e99-9754-03583db47182)
 
 Open this link and play the game!
+
 ![image](https://github.com/SimpleNic/Four-Corners/assets/25697454/1d01e9ea-ff2f-4a5b-bbc9-bb3d476fe2ae)
